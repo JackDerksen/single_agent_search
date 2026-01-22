@@ -1,4 +1,4 @@
-# CMPT 355 - Lab Project 1
+# CMPT 355 - Project 1
 ### Jack Derksen, Rordon Crawley, Robin Huppertz, Tuan Huynh
 
 ---
