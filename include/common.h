@@ -14,4 +14,7 @@
 #include <ostream>
 #include <functional>
 
+// Disk type for small and large disks
+using Disk = uint16_t;
+
 #endif // COMMON_H

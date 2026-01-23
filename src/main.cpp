@@ -1,4 +1,5 @@
 #include "astar.h"
+#include "common.h"
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -9,13 +10,13 @@ int main(int argc, char** argv) {
     size_t num_large = n * n + 1;
 
     // Read large disks
-    std::vector<int> large(num_large);
+    std::vector<Disk> large(num_large);
     for (size_t i = 0; i < num_large; ++i) {
         std::cin >> large[i];
     }
 
     // Read small disks
-    std::vector<int> small(num_large);
+    std::vector<Disk> small(num_large);
     for (size_t i = 0; i < num_large; ++i) {
         std::cin >> small[i];
     }
@@ -26,13 +27,11 @@ int main(int argc, char** argv) {
     // If any of you want to test this yourself, I did so with:
     // echo -e "1 2 3 4 5 6 7 8 9 10\n1 2 3 4 5 6 7 8 9 0" | ./bin/AB 3
     State s1;
-    s1.large = {1,2,3};
     s1.small = {4,5};
 
     State s2 = s1;
 
     State s3;
-    s3.large = {1,2};
     s3.small = {4,5,6};
     StateHash hasher;
 
@@ -50,12 +49,11 @@ int main(int argc, char** argv) {
     }
     std::cout << "Printing s1: " << s1 << std::endl;
 
-    Problem problem(n);
+    Problem problem(large);
     ZeroHeuristic h;
     AStar solver(problem, h);
 
     State start_state;
-    start_state.large = large;
     start_state.small = small;
     auto solution = solver.solve(start_state);
 

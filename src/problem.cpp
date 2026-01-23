@@ -1,6 +1,6 @@
 #include "problem.h"
 
-Problem::Problem(size_t n) {
+Problem::Problem(const std::vector<Disk>& large_disks) : large(large_disks) {
 }
 
 bool Problem::is_goal(const State &s) const {
