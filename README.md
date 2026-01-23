@@ -12,3 +12,7 @@ make
 ./bin/AB      # Unix
 bin\AB.exe    # Windows
 ```
+
+## Roadmap
+- [x] State class with large/small disk stacks, equality comparison, output printing, and hashing
+    - [x] Sanity tests performed in main file to verify hashing correctness
