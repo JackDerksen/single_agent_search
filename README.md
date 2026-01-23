@@ -9,6 +9,6 @@ I wrote the Makefile with MinGW, MSYS2, and WSL in mind (i.e., not raw MSVC + nm
 You should just be able to build the project with:
 ```
 make
-./bin/hello      # Unix
-bin\hello.exe    # Windows
+./bin/AB      # Unix
+bin\AB.exe    # Windows
 ```

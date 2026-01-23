@@ -10,11 +10,11 @@ OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 # Executable name (.exe for Windows)
 ifeq ($(OS),Windows_NT)
-    TARGET := $(BIN_DIR)/hello.exe
+    TARGET := $(BIN_DIR)/AB.exe
     MKDIR_P := powershell -Command "New-Item -ItemType Directory -Force"
     RM_RF := powershell -Command "Remove-Item -Recurse -Force"
 else
-    TARGET := $(BIN_DIR)/hello
+    TARGET := $(BIN_DIR)/AB
     MKDIR_P := mkdir -p
     RM_RF := rm -rf
 endif
