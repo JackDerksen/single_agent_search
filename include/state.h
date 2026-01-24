@@ -3,12 +3,10 @@
 
 #include "common.h"
 
-/// Represents the state of the puzzle, with two stacks: large and small disks.
+/// Represents the state of the puzzle, containing only the small disks that change.
 struct State {
-  /// Stack of large disks, represented as a vector of integers (e.g., disk sizes).
-  std::vector<int> large;
-  /// Stack of small disks, represented as a vector of integers.
-  std::vector<int> small;
+  /// Stack of small disks, represented as a vector of Disk IDs.
+  std::vector<Disk> small;
 
   /// Default lightweight constructor.
   State() = default;

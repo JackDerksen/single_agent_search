@@ -7,7 +7,9 @@
 // Game/problem rules (successors, testing the goal, etc.)
 class Problem {
   public:
-    explicit Problem(size_t n);
+    std::vector<Disk> large;  // Read-only large disks
+
+    explicit Problem(const std::vector<Disk>& large_disks);
 
     bool is_goal(const State &s) const;
     std::vector<State> successors(const State &s) const;
