@@ -7,12 +7,12 @@
 struct State {
   /// Stack of small disks, represented as a vector of Disk IDs.
   std::vector<Disk> small;
-
-  /// Default lightweight constructor.
-  State() = default;
+  uint32_t zeroIndex = 0;
 
   /// Equality operator: compares both large and small stacks element-wise.
   bool operator==(const State &other) const;
+  bool IsGoal(int n);
+  uint32_t GetZeroIndex();
 };
 
 /// Output operator for printing the State as space-separated small disk values.

@@ -1,8 +1,32 @@
 #include "state.h"
+#include "common.h"
 
 /// Implements equality operator by comparing the small vectors only.
-bool State::operator==(const State &other) const {
-    return small == other.small;
+bool State::operator==(const State& other) const { return small == other.small; }
+
+bool State::IsGoal(int n)
+{
+    assert(small[zeroIndex] == 0);
+    for (int i = 0; i < n*n; i++)
+    {
+            int index = (zeroIndex + 1 + i) % (int)small.size();
+            int expected = (i / n) + 1;
+            if (small[index] != expected)
+                return false;
+    }
+	return true;
+}
+
+uint32_t State::GetZeroIndex()
+{
+    for (uint32_t i = 0; i < small.size(); i++)
+    {
+        if (small[i] == 0) { return i;  }
+    }
+
+    std::cerr << "Assertion failed: Small disk state has no empty space!" << std::endl;
+    assert(false);
+    return 0;
 }
 
 /// Implements a printing operator for the State as space-separated small disk values (0 for uncovered).
