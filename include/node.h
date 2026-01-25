@@ -10,7 +10,7 @@ struct Node {
   int h; // Heuristic
   int f() const { return g + h; }
 
-  std::shared_ptr<Node> parent;
+  Node * parent;
 };
 
 #endif // NODE_H
