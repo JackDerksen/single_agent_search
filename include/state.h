@@ -8,8 +8,7 @@ struct State {
   /// Stack of small disks, represented as a vector of Disk IDs.
   std::vector<Disk> small;
 
-  /// Default lightweight constructor.
-  State() = default;
+  bool IsGoal();
 
   /// Equality operator: compares both large and small stacks element-wise.
   bool operator==(const State &other) const;

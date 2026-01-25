@@ -5,6 +5,11 @@ bool State::operator==(const State &other) const {
     return small == other.small;
 }
 
+bool State::IsGoal()
+{
+	return false;
+}
+
 /// Implements a printing operator for the State as space-separated small disk values (0 for uncovered).
 std::ostream& operator<<(std::ostream& os, const State& s) {
     for (size_t i = 0; i < s.small.size(); ++i) {

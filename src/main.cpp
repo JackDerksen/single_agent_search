@@ -1,14 +1,11 @@
 #include "astar.h"
 #include "common.h"
+#include "problem.h"
+#include <cstddef>
 
-int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
-        return 1;
-    }
-    size_t n = std::stoi(argv[1]);
+Problem ReadUserInput(size_t n)
+{
     size_t num_large = n * n + 1;
-
     // Read large disks
     std::vector<Disk> large(num_large);
     for (size_t i = 0; i < num_large; ++i) {
@@ -20,6 +17,17 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < num_large; ++i) {
         std::cin >> small[i];
     }
+
+	return Problem(large, small);
+}
+
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
+        return 1;
+    }
+    size_t n = std::stoi(argv[1]);
+	Problem p = ReadUserInput(n);
 
     // Everything below is just a sanity test for StateHash (using dummy data).
     // We can delete this later, of course :)
@@ -49,13 +57,9 @@ int main(int argc, char** argv) {
     }
     std::cout << "Printing s1: " << s1 << std::endl;
 
-    Problem problem(large);
     ZeroHeuristic h;
-    AStar solver(problem, h);
-
-    State start_state;
-    start_state.small = small;
-    auto solution = solver.solve(start_state);
+    AStar solver(p, h);
+    auto solution = solver.solve();
 
     // print_solution(solution);
 }
