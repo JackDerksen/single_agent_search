@@ -7,7 +7,7 @@
 // Game/problem rules (successors, testing the goal, etc.)
 struct Problem {
     std::vector<Disk> large;  // Read-only large disks
-    std::vector<Disk> small;  // Read-only large disks
+	State small;
     explicit Problem(const std::vector<Disk>& large_disks, const std::vector<Disk>& small_disks);
 };
 

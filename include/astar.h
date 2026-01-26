@@ -10,6 +10,7 @@
 
 // A* algorithm interface
 class AStar {
+	Problem problem;
   public:
     AStar(const Problem &problem, const Heuristic &h);
 

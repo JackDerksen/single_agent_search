@@ -7,6 +7,7 @@
 struct State {
   /// Stack of small disks, represented as a vector of Disk IDs.
   std::vector<Disk> small;
+  uint32_t zeroIndex;
 
   bool IsGoal();
 
