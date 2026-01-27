@@ -74,7 +74,7 @@ std::vector<State> AStar::solve()
 	nodes.reserve(1024);
 
 	State startState = problem.small;
-	nodes.push_back((Node){.state = startState, .g = 0, .h = 0, .parent = NULL});
+	nodes.push_back(Node{.state = startState, .g = 0, .h = 0, .parent = NULL});
 	frontier.push(&nodes[0]);
 
 	while (!frontier.empty())

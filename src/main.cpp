@@ -22,12 +22,18 @@ Problem ReadUserInput(size_t n)
 }
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
+	/*
+    if (argc < 2)
+	{
         std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
         return 1;
     }
     size_t n = std::stoi(argv[1]);
-	Problem p = ReadUserInput(n);
+	*/
+
+	// Problem p = ReadUserInput(n);
+	Problem p = Problem({1,2,3,4,1,2,3,1,2,3}, {1,1,1,3,2,2,3,3,0,2});
+    p.small.zeroIndex = 8;
 
     // Everything below is just a sanity test for StateHash (using dummy data).
     // We can delete this later, of course :)
