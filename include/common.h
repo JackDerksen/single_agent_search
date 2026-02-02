@@ -15,6 +15,7 @@
 #include <functional>
 #include <cassert>
 #include <cstddef>
+#include <algorithm>
 
 // Disk type for small and large disks
 using Disk = uint16_t;
