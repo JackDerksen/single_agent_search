@@ -24,7 +24,7 @@ Problem ReadUserInput(size_t num_large)
 
 void PrintSolution(std::vector<State> solution)
 {
-    std::cout << "The solution is:" << std::endl;
+    std::cout << "Solution is" << std::endl;
     for (State s : solution) { std::cout << s << std::endl; }
 }
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 		ZeroHeuristic zeroHeuristic;
 		AStar solver(p, zeroHeuristic);
 
-		auto solution = solver.solve();
+		auto solution = solver.solve(false);
 		PrintSolution(solution);
 	}
 	else
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 		ZeroHeuristic zeroHeuristic;
 		AStar solver(p, zeroHeuristic);
 
-		auto solution = solver.solve();
+		auto solution = solver.solve(true);
 		PrintSolution(solution);
 	}
 
