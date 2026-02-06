@@ -18,7 +18,7 @@
 #include <algorithm>
 
 // Disk type for small and large disks
-using Disk = uint16_t;
+using Disk = uint8_t;
 
 typedef enum {
 	SWAP_RIGHT,
