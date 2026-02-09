@@ -15,7 +15,7 @@ struct ZeroHeuristic : Heuristic {
     int operator()(const State&) const override { return 0; }
 };
 
-struct SlowHeuristic: Heuristic {
+struct MisplacedDiscHeuristic: Heuristic {
     int operator()(const State&) const override;
 };
 
@@ -27,6 +27,6 @@ struct HopHeuristic : Heuristic {
     void initialize(const Problem& p) override;
 };
 
-uint32_t MisplacedTileCount(const State& s, uint32_t startIdx, uint32_t n);
+uint32_t MisplacedDiscCount(const State& s, uint32_t startIdx, uint32_t n);
 
 #endif // HEURISTIC_H
