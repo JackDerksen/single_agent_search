@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.20)
 project(ABSolver LANGUAGES CXX)
 
 # Specify C++ standard
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Gather all source files (non-recursive)

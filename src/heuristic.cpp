@@ -53,7 +53,7 @@ void HopHeuristic::initialize(const Problem& p)
 	// TODO: Generate goal states.
 
 	hopMatrix.resize(numDisks);
-	for (std::vector row : hopMatrix)
+	for (std::vector<int> & row : hopMatrix)
 	{
 		row.resize(numDisks);
 	}
