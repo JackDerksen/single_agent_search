@@ -11,10 +11,11 @@
 // A* algorithm interface
 class AStar {
 	Problem problem;
-	const Heuristic & heuristic;
+	Heuristic & heuristic;
   public:
-    AStar(const Problem &problem, const Heuristic &h);
     std::vector<State> solve(bool debug);
+    AStar(const Problem &problem, Heuristic &h);
+    std::vector<State> solve();
 };
 
 #endif // ASTAR_H

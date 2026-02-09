@@ -4,7 +4,10 @@
 #include "common.h"
 #include <cstdint>
 
-AStar::AStar(const Problem &p, const Heuristic &h): problem(p), heuristic(h) { }
+AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
+{
+	heuristic.initialize(problem);
+}
 
 bool CompareNodes(const Node* a, const Node* b) { return a->f() > b->f(); }
 
@@ -36,7 +39,7 @@ Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuri
 	state.small[parent->state.zeroIndex] = state.small[state.zeroIndex];
 	state.small[state.zeroIndex] = 0;
 
-	Node node = {.state = state, .g = parent->g + 1, .h = heuristic(state), .parent = parent};
+	Node node = {state,  parent->g + 1, heuristic(state), parent};
 	return node;
 }
 
@@ -69,7 +72,7 @@ std::vector<State> AStar::solve(bool debug)
 	std::deque<Node> nodes;
 
 	State startState = problem.smallState;
-	nodes.push_back(Node{.state = startState, .g = 0, .h = heuristic(startState), .parent = NULL});
+	nodes.push_back(Node{startState, 0, heuristic(startState), NULL});
 	frontier.push(&nodes[0]);
 
 	while (!frontier.empty())

@@ -61,6 +61,8 @@ void RunTests()
     // Test IsGoal Function
     State g1 = { {0, 1, 1, 1, 2, 2, 2, 3, 3, 3}, 0};
     assert(g1.IsGoal(3));
+	std::cout << MisplacedDiscCount(g1, 1, 3) << std::endl;
+	
 
     State g2 = { {2, 2, 0, 1, 1}, 2};
     assert(g2.IsGoal(2));
@@ -96,12 +98,13 @@ int main(int argc, char** argv) {
 
 		// Problem from the example solver.
 		Problem p = Problem({1,3,4,2,4,3,2,1,1,2,3,4,3,1,4,2,5}, {1,1,1,1,2,2,2,2,3,4,3,3,4,0,4,3,4}, 4);
-		
+		// Problem p = Problem({1,2,3,4,5,4,3,2,1,1,2,3,4,1,2,3,4}, {3,2,3,2,1,0,2,1,1,3,4,1,4,2,4,3,4}, 4);
+
 		// NOTE(rordon): Don't try this problem until we have a better heuristic. This one gets up to over 300,000,000 nodes with BFS.
 		//Problem p = Problem({1,3,3,4,1,2,1,2,5,4,2,3,3,2,4,1,4}, {0,2,4,1,3,4,2,3,1,4,3,2,1,3,4,1,2}, 4);
 
-		ZeroHeuristic zeroHeuristic;
-		AStar solver(p, zeroHeuristic);
+		MisplacedDiscHeuristic misplacedDiscHeuristic;
+		AStar solver(p, misplacedDiscHeuristic);
 
 		auto solution = solver.solve(true);
 		PrintSolution(solution);
