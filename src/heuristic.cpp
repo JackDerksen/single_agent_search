@@ -15,6 +15,12 @@ uint32_t MisplacedTileCount(const State& s, uint32_t startIdx, uint32_t n)
 	return misplaced;
 }
 
+uint32_t CalculateHops(size_t startPos, size_t destPos, const Problem& p)
+{ 
+	// TODO
+	return 0;
+}
+
 int SlowHeuristic::operator()(const State& s) const
 {
 	uint32_t n = floor(std::sqrt(s.small.size())) + 1;
@@ -25,4 +31,38 @@ int SlowHeuristic::operator()(const State& s) const
 		if (count > largestCount) { largestCount = count; }
 	}
     return largestCount;
+}
+
+int HopHeuristic::operator()(const State& s) const
+{
+	// for state in goalstates 
+	//	for each disc
+	//		get nearest goal position
+	//		get num hops to nearest position
+	//		add to sum
+	//	store sum for goalstate
+	// return lowest sum for goalstates
+	return 0;
+}
+
+// Initialize the hop matrix and generate goal states.
+void HopHeuristic::initialize(const Problem& p)
+{
+	size_t numDisks = (p.n * p.n) + 1;
+
+	// TODO: Generate goal states.
+
+	hopMatrix.resize(numDisks);
+	for (std::vector row : hopMatrix)
+	{
+		row.resize(numDisks);
+	}
+
+	for (size_t i = 0; i < hopMatrix.size(); i++)
+	{
+		for (size_t j = 0; j< hopMatrix.size(); j++)
+		{
+			CalculateHops(i, j, p);
+		}
+	}
 }

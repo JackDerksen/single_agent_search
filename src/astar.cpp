@@ -4,7 +4,10 @@
 #include "common.h"
 #include <cstdint>
 
-AStar::AStar(const Problem &p, const Heuristic &h): problem(p), heuristic(h) { }
+AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
+{
+	heuristic.initialize(problem);
+}
 
 bool CompareNodes(const Node* a, const Node* b) { return a->f() > b->f(); }
 

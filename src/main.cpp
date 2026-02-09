@@ -103,8 +103,9 @@ int main(int argc, char** argv) {
 		// NOTE(rordon): Don't try this problem until we have a better heuristic. This one gets up to over 300,000,000 nodes with BFS.
 		//Problem p = Problem({1,3,3,4,1,2,1,2,5,4,2,3,3,2,4,1,4}, {0,2,4,1,3,4,2,3,1,4,3,2,1,3,4,1,2}, 4);
 
-		SlowHeuristic zeroHeuristic;
-		AStar solver(p, zeroHeuristic);
+		// SlowHeuristic zeroHeuristic;
+        HopHeuristic hopHeuristic;
+		AStar solver(p, hopHeuristic);
 
 		auto solution = solver.solve(true);
 		PrintSolution(solution);

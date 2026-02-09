@@ -2,10 +2,12 @@
 #define HEURISTIC_H
 
 #include "state.h"
+#include "problem.h"
 
 // Heuristic interface
 struct Heuristic {
     virtual int operator()(const State &s) const = 0;
+    virtual void initialize(const Problem& p) {}
     virtual ~Heuristic() = default;
 };
 
@@ -15,6 +17,14 @@ struct ZeroHeuristic : Heuristic {
 
 struct SlowHeuristic: Heuristic {
     int operator()(const State&) const override;
+};
+
+struct HopHeuristic : Heuristic {
+    std::vector<std::vector<int>> hopMatrix;
+    std::vector<std::vector<Disk>> goalStates;
+
+    int operator()(const State&) const override;
+    void initialize(const Problem& p) override;
 };
 
 uint32_t MisplacedTileCount(const State& s, uint32_t startIdx, uint32_t n);

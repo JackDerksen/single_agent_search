@@ -33,7 +33,7 @@ uint32_t State::GetZeroIndex()
 std::ostream& operator<<(std::ostream& os, const State& s) {
     for (size_t i = 0; i < s.small.size(); ++i) {
         if (i > 0) os << " ";
-        os << s.small[i];
+        os << static_cast<int>(s.small[i]);
     }
     return os;
 }
