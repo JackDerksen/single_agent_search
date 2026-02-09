@@ -14,7 +14,7 @@ class AStar {
 	const Heuristic & heuristic;
   public:
     AStar(const Problem &problem, const Heuristic &h);
-    std::vector<State> solve();
+    std::vector<State> solve(bool debug);
 };
 
 #endif // ASTAR_H

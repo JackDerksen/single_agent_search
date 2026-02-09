@@ -62,7 +62,7 @@ uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & larg
 	return 2;
 }
 
-std::vector<State> AStar::solve()
+std::vector<State> AStar::solve(bool debug)
 {
 	std::priority_queue<Node*, std::vector<Node*>, bool(*)(const Node*, const Node*)> frontier(CompareNodes);
 	std::unordered_map<State, Node*, StateHash> closed;
@@ -79,7 +79,6 @@ std::vector<State> AStar::solve()
 		if (n->state.IsGoal(problem.n))
 		{
 			// return path.
-			std::cout << "Number of nodes: " <<nodes.size() << std::endl;
 			std::vector<State> solution;
 			Node* current = n;
 			solution.push_back(current->state);
@@ -89,7 +88,11 @@ std::vector<State> AStar::solve()
 				solution.push_back(current->state);
 			}
 			std::reverse(solution.begin(), solution.end());
-			std::cout << "Moves to solve: " << solution.size() << std::endl;
+			if (debug)
+			{
+				std::cout << "Number of nodes: " <<nodes.size() << std::endl;
+				std::cout << "Moves to solve: " << solution.size() << std::endl;
+			}
 			return solution;
 		}
 		else
