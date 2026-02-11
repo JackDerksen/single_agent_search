@@ -14,6 +14,15 @@ AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
 
 int WrapIndex(int i, int n) { return (i % n + n) % n; }
 
+static inline bool IsInverseMove(Move a, Move b)
+{
+	// Returns true iff b immediately undoes a
+	return (a == SWAP_RIGHT   && b == SWAP_LEFT) ||
+		   (a == SWAP_LEFT    && b == SWAP_RIGHT) ||
+		   (a == SWAP_N_RIGHT && b == SWAP_N_LEFT) ||
+		   (a == SWAP_N_LEFT  && b == SWAP_N_RIGHT);
+}
+
 Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuristic & heuristic)
 {
 	State state = {parent->state.small};
@@ -40,15 +49,17 @@ Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuri
 	state.small[parent->state.zeroIndex] = state.small[state.zeroIndex];
 	state.small[state.zeroIndex] = 0;
 
-	Node node = {state,  parent->g + 1, heuristic(state), parent};
+	Node node;
+	node.state = state;
+	node.g = parent->g + 1;
+	node.h = heuristic(state);
+	node.lastMove = move;
+	node.parent = parent;
 	return node;
 }
 
 uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & large, const Heuristic & h)
 {
-	// NOTE(rordon): it would be nice if we could track what the last move was
-	// 				 and not add nodes that undo the last move to save time.
-
 	uint32_t largeValue = large[n->state.zeroIndex];
 
 	// Add swap left and swap right states
@@ -64,6 +75,26 @@ uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & larg
 	}
 
 	return 2;
+}
+
+uint32_t ExpandNodeNoUndo(Node * n, Node * outChildren, const std::vector<Disk> & large, const Heuristic & h, Move lastMove, bool hasLastMove)
+{
+	uint32_t largeValue = large[n->state.zeroIndex];
+
+	Move candidates[4] = { SWAP_RIGHT, SWAP_LEFT, SWAP_N_RIGHT, SWAP_N_LEFT };
+	uint32_t candidateCount = (largeValue != 1) ? 4u : 2u;
+
+	uint32_t outCount = 0;
+	for (uint32_t i = 0; i < candidateCount; i++)
+	{
+		Move m = candidates[i];
+		if (hasLastMove && IsInverseMove(lastMove, m))
+			continue;
+
+		outChildren[outCount++] = GenerateMoveNode(n, m, largeValue, h);
+	}
+
+	return outCount;
 }
 
 static std::vector<State> ReconstructSolutionFromPath(const std::vector<Node> &path)
@@ -116,7 +147,28 @@ static IDAResult IDAStarDfs(
 	expanded++;
 
 	Node children[4];
-	uint16_t childCount = ExpandNode(&current, children, problem.large, heuristic);
+
+	Move lastMove = SWAP_RIGHT;
+	bool hasLastMove = false;
+	if (path.size() >= 2)
+	{
+		const Node &parent = path[path.size() - 2];
+		const Node &curr = path[path.size() - 1];
+
+		int diff = (int)curr.state.zeroIndex - (int)parent.state.zeroIndex;
+		int numDisks = (int)parent.state.small.size();
+		diff = WrapIndex(diff, numDisks);
+
+		// Determine which move was taken from parent -> current by examining the zeroIndex delta.
+		// This is enough to identify the immediate inverse move to skip
+		int largeValue = (int)problem.large[parent.state.zeroIndex];
+		if (diff == WrapIndex( largeValue, numDisks)) { lastMove = SWAP_RIGHT; hasLastMove = true; }
+		else if (diff == WrapIndex(-largeValue, numDisks)) { lastMove = SWAP_LEFT; hasLastMove = true; }
+		else if (diff == WrapIndex( 1, numDisks)) { lastMove = SWAP_N_RIGHT; hasLastMove = true; }
+		else if (diff == WrapIndex(-1, numDisks)) { lastMove = SWAP_N_LEFT; hasLastMove = true; }
+	}
+
+	uint16_t childCount = (uint16_t)ExpandNodeNoUndo(&current, children, problem.large, heuristic, lastMove, hasLastMove);
 
 	int minNext = std::numeric_limits<int>::max();
 
@@ -157,7 +209,12 @@ std::vector<State> AStar::solve(bool debug)
 
 	assert(startState.small.size() > 0);
 
-	Node startNode{startState, 0, heuristic(startState), NULL};
+	Node startNode;
+	startNode.state = startState;
+	startNode.g = 0;
+	startNode.h = heuristic(startState);
+	startNode.lastMove = SWAP_RIGHT;
+	startNode.parent = NULL;
 
 	std::vector<Node> path;
 	path.reserve(1024);
