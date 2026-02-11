@@ -13,9 +13,29 @@ Problem ReadUserInput(size_t num_large)
     }
 
     // Read small disks
-    std::vector<Disk> small(num_large);
+    std::vector<Disk> small;
+    small.reserve(num_large + 1);
+
     for (size_t i = 0; i < num_large; ++i) {
-        std::cin >> small[i];
+        Disk v;
+        std::cin >> v;
+        small.push_back(v);
+    }
+
+    // Try to read one more value. If present, treat it as part of the small state.
+    // If not present, append the empty space below.
+    Disk extra;
+    if (std::cin >> extra) {
+        small.push_back(extra);
+    }
+
+    // Ensure there is exactly one 0 in the small state
+    size_t zeroCount = 0;
+    for (Disk v : small) {
+        if (v == 0) ++zeroCount;
+    }
+    if (zeroCount == 0) {
+        small.push_back(0);
     }
 
 	uint16_t n = floor(sqrt((double)num_large));
@@ -62,7 +82,6 @@ void RunTests()
     State g1 = { {0, 1, 1, 1, 2, 2, 2, 3, 3, 3}, 0};
     assert(g1.IsGoal(3));
 	std::cout << MisplacedDiscCount(g1, 1, 3) << std::endl;
-	
 
     State g2 = { {2, 2, 0, 1, 1}, 2};
     assert(g2.IsGoal(2));
@@ -72,7 +91,6 @@ void RunTests()
 }
 
 int main(int argc, char** argv) {
-	
     if (argc < 2)
 	{
         std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;

@@ -2,14 +2,15 @@
 #include "problem.h"
 #include "state.h"
 #include "common.h"
+#include "node.h"
 #include <cstdint>
+#include <limits>
+#include <unordered_set>
 
 AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
 {
 	heuristic.initialize(problem);
 }
-
-bool CompareNodes(const Node* a, const Node* b) { return a->f() > b->f(); }
 
 int WrapIndex(int i, int n) { return (i % n + n) % n; }
 
@@ -46,10 +47,10 @@ Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuri
 uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & large, const Heuristic & h)
 {
 	// NOTE(rordon): it would be nice if we could track what the last move was
-	// 				 and not add nodes that undo the last move to save time. 
-	
+	// 				 and not add nodes that undo the last move to save time.
+
 	uint32_t largeValue = large[n->state.zeroIndex];
-	
+
 	// Add swap left and swap right states
 	outChildren[0] = GenerateMoveNode(n, SWAP_RIGHT, largeValue, h);
 	outChildren[1] = GenerateMoveNode(n, SWAP_LEFT,  largeValue, h);
@@ -65,74 +66,134 @@ uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & larg
 	return 2;
 }
 
-std::vector<State> AStar::solve(bool debug)
+static std::vector<State> ReconstructSolutionFromPath(const std::vector<Node> &path)
 {
-	std::priority_queue<Node*, std::vector<Node*>, bool(*)(const Node*, const Node*)> frontier(CompareNodes);
-	std::unordered_map<State, Node*, StateHash> closed;
-	std::deque<Node> nodes;
+	std::vector<State> solution;
+	solution.reserve(path.size());
+	for (const Node &n : path) { solution.push_back(n.state); }
+	return solution;
+}
 
-	State startState = problem.smallState;
-	nodes.push_back(Node{startState, 0, heuristic(startState), NULL});
-	frontier.push(&nodes[0]);
+// Returns either:
+// - found==true and solution populated, or
+// - found==false and the next f-bound to try (minNextBound)
+struct IDAResult
+{
+	bool found = false;
+	int minNextBound = std::numeric_limits<int>::max();
+	std::vector<State> solution;
+};
 
-	while (!frontier.empty())
+static IDAResult IDAStarDfs(
+	const Problem &problem,
+	const Heuristic &heuristic,
+	std::vector<Node> &path,
+	std::unordered_set<State, StateHash> &onPath,
+	int bound,
+	bool debug,
+	uint64_t &expanded)
+{
+	Node &current = path.back();
+
+	// f = g + h
+	int f = current.g + current.h;
+	if (f > bound)
 	{
-		Node * n = frontier.top();
-		frontier.pop();
-		if (n->state.IsGoal(problem.n))
-		{
-			// return path.
-			std::vector<State> solution;
-			Node* current = n;
-			solution.push_back(current->state);
-			while (current->parent != NULL)
-			{
-				current = current->parent;
-				solution.push_back(current->state);
-			}
-			std::reverse(solution.begin(), solution.end());
-			if (debug)
-			{
-				std::cout << "Number of nodes: " <<nodes.size() << std::endl;
-				std::cout << "Moves to solve: " << solution.size() << std::endl;
-			}
-			return solution;
-		}
-		else
-		{
-			closed[n->state] = n; 
-
-			// Expand node
-			Node children[4];
-			uint16_t childCount = ExpandNode(n, children, problem.large, heuristic);
-			
-			for (int i = 0; i < childCount; i++)
-			{
-				Node * child = &children[i];
-				// Check if child is in closed set.
-				auto it = closed.find(child->state);
-				if (it != closed.end())
-				{
-					// Check if cost to new node is less
-					Node * existingChild = it->second;
-					if (child->g < existingChild->g)
-					{
-						// Update existing node with new cost and parent.
-						existingChild->g = child->g;
-						existingChild->parent = n;
-						// Reopen node
-						frontier.push(existingChild);
-					}
-				}
-				else
-				{
-					// New node, store and add to frontier.
-					nodes.push_back(*child);
-					frontier.push(&nodes.back());
-				}
-			}
-		}
+		IDAResult r;
+		r.found = false;
+		r.minNextBound = f;
+		return r;
 	}
 
-    return {};
+	if (current.state.IsGoal(problem.n))
+	{
+		IDAResult r;
+		r.found = true;
+		r.solution = ReconstructSolutionFromPath(path);
+		return r;
+	}
+
+	expanded++;
+
+	Node children[4];
+	uint16_t childCount = ExpandNode(&current, children, problem.large, heuristic);
+
+	int minNext = std::numeric_limits<int>::max();
+
+	for (uint16_t i = 0; i < childCount; i++)
+	{
+		Node child = children[i];
+
+		// Avoid cycles along current DFS path
+		if (onPath.find(child.state) != onPath.end())
+			continue;
+
+		// Push
+		path.push_back(child);
+		onPath.insert(child.state);
+
+		IDAResult r = IDAStarDfs(problem, heuristic, path, onPath, bound, debug, expanded);
+		if (r.found)
+			return r;
+
+		if (r.minNextBound < minNext)
+			minNext = r.minNextBound;
+
+		// Pop
+		onPath.erase(child.state);
+		path.pop_back();
+	}
+
+	IDAResult out;
+	out.found = false;
+	out.minNextBound = minNext;
+	return out;
+}
+
+// IDA* keeps memory bounded (O(depth)) while still leveraging the existing heuristic (as an admissible f-bound)
+std::vector<State> AStar::solve(bool debug)
+{
+	State startState = problem.smallState;
+
+	assert(startState.small.size() > 0);
+
+	Node startNode{startState, 0, heuristic(startState), NULL};
+
+	std::vector<Node> path;
+	path.reserve(1024);
+	path.push_back(startNode);
+
+	std::unordered_set<State, StateHash> onPath;
+	onPath.insert(startState);
+
+	int bound = startNode.g + startNode.h;
+
+	uint64_t expanded = 0;
+	while (true)
+	{
+		IDAResult r = IDAStarDfs(problem, heuristic, path, onPath, bound, debug, expanded);
+		if (r.found)
+		{
+			if (debug)
+			{
+				std::cout << "Expanded nodes: " << expanded << std::endl;
+				std::cout << "Moves to solve: " << r.solution.size() << std::endl;
+			}
+			return r.solution;
+		}
+
+		// No solution within this bound, so increase to the smallest f that exceeded it
+		if (r.minNextBound == std::numeric_limits<int>::max())
+		{
+			// Search space exhausted (should not happen for a solvable instance)
+			return {};
+		}
+
+		bound = r.minNextBound;
+
+		// The DFS fully unwinds back to the root before returning, so path
+		// should be back to just the start node.
+		assert(path.size() == 1);
+		assert(onPath.size() == 1);
+	}
 }
