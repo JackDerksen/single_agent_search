@@ -2,6 +2,7 @@
 #include "problem.h"
 #include "state.h"
 #include "common.h"
+#include "util.h"
 #include <cstdint>
 
 AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
@@ -10,8 +11,6 @@ AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
 }
 
 bool CompareNodes(const Node* a, const Node* b) { return a->f() > b->f(); }
-
-int WrapIndex(int i, int n) { return (i % n + n) % n; }
 
 Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuristic & heuristic)
 {

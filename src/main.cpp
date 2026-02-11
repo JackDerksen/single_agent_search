@@ -3,6 +3,7 @@
 #include "problem.h"
 #include <cmath>
 #include <cstdint>
+#include <chrono>
 
 Problem ReadUserInput(size_t num_large)
 {
@@ -94,19 +95,29 @@ int main(int argc, char** argv) {
 	}
 	else
 	{
-		RunTests();
+		// RunTests();
 
 		// Problem from the example solver.
-		Problem p = Problem({1,3,4,2,4,3,2,1,1,2,3,4,3,1,4,2,5}, {1,1,1,1,2,2,2,2,3,4,3,3,4,0,4,3,4}, 4);
-		// Problem p = Problem({1,2,3,4,5,4,3,2,1,1,2,3,4,1,2,3,4}, {3,2,3,2,1,0,2,1,1,3,4,1,4,2,4,3,4}, 4);
+		Problem AB17      = Problem({1,3,4,2,4,3,2,1,1,2,3,4,3,1,4,2,5}, {1,1,1,1,2,2,2,2,3,4,3,3,4,0,4,3,4}, 4);
+		Problem AB10      = Problem({1,2,3,4,1,2,3,1,2,3}, {1,1,1,3,2,2,3,3,0,2}, 2);
+		Problem AB17_HARD = Problem({1,2,3,4,5,4,3,2,1,1,2,3,4,1,2,3,4}, {3,2,3,2,1,0,2,1,1,3,4,1,4,2,4,3,4}, 4);
 
 		// NOTE(rordon): Don't try this problem until we have a better heuristic. This one gets up to over 300,000,000 nodes with BFS.
 		//Problem p = Problem({1,3,3,4,1,2,1,2,5,4,2,3,3,2,4,1,4}, {0,2,4,1,3,4,2,3,1,4,3,2,1,3,4,1,2}, 4);
-
+        
+        // Heuristics
+		ZeroHeuristic zeroHueristic;
 		MisplacedDiscHeuristic misplacedDiscHeuristic;
-		AStar solver(p, misplacedDiscHeuristic);
+		HopHeuristic hopHeuristic;
 
-		auto solution = solver.solve(true);
+		AStar solver(AB17_HARD, hopHeuristic);
+
+        auto start = std::chrono::high_resolution_clock::now();
+        auto solution = solver.solve(true);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+        std::cout << "Time to solve: " << elapsed.count() << " seconds\n";
+        
 		PrintSolution(solution);
 	}
 

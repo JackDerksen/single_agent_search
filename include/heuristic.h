@@ -21,7 +21,6 @@ struct MisplacedDiscHeuristic: Heuristic {
 
 struct HopHeuristic : Heuristic {
     std::vector<std::vector<int>> hopMatrix;
-    std::vector<std::vector<Disk>> goalStates;
 
     int operator()(const State&) const override;
     void initialize(const Problem& p) override;
