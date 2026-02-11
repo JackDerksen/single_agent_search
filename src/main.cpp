@@ -10,13 +10,17 @@ Problem ReadUserInput(size_t num_large)
     // Read large disks
     std::vector<Disk> large(num_large);
     for (size_t i = 0; i < num_large; ++i) {
-        std::cin >> large[i];
+		int value;
+        std::cin >> value;
+		large[i] = (Disk)(value);
     }
 
     // Read small disks
     std::vector<Disk> small(num_large);
     for (size_t i = 0; i < num_large; ++i) {
-        std::cin >> small[i];
+		int value;
+        std::cin >> value;
+		small[i] = (Disk)(value);
     }
 
 	uint16_t n = floor(sqrt((double)num_large));
