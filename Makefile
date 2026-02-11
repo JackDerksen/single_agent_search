@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS ?= -std=c++14 -Wall -Wextra -Iinclude
+CXXFLAGS ?= -std=c++14 -Wall -Wextra -Iinclude -Wno-unused-parameter
 
 SRC_DIR := src
 OBJ_DIR := build

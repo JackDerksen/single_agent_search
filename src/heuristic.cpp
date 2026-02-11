@@ -1,5 +1,7 @@
 #include "heuristic.h"
 #include "util.h"
+#include <cstddef>
+#include <limits>
 #include <cmath>
 #include <cstdint>
 
@@ -46,10 +48,10 @@ void CreateHopMatrix(std::vector<std::vector<int>> & matrix, const Problem& p)
 	{
 		Disk large = p.large[i];
 		DiskMoves m = {
-			WrapIndex(i - 1, n),
-			WrapIndex(i + 1, n),
-			WrapIndex(i - large, n),
-			WrapIndex(i + large, n)
+			(size_t)WrapIndex((i - 1), n),
+			(size_t)WrapIndex((i + 1), n),
+			(size_t)WrapIndex((i - large), n),
+			(size_t)WrapIndex((i + large), n)
 		};
 		moves[i] = m;
 	}
@@ -85,7 +87,7 @@ void CreateHopMatrix(std::vector<std::vector<int>> & matrix, const Problem& p)
 
 void GetGoalPositions(std::vector<int> & goals, Disk disk, int zeroIndex, int groupSize)
 {
-	assert(goals.size() == groupSize);
+	assert((int)goals.size() == groupSize);
 
 	int n = groupSize * groupSize + 1; // Number of disks
 	int startIndex = groupSize * (disk - 1); // Start index of group (without rotation)
