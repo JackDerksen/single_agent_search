@@ -114,7 +114,7 @@ int RunNormalMode(std::size_t num_large) {
     Problem p = ReadUserInput(num_large);
 
     // Default heuristic for stdin-driven mode.
-    ZeroHeuristic heuristic;
+    HopHeuristic heuristic;
 
     SolveOptions opts;
     opts.solver = SolverKind::IDAStar;
