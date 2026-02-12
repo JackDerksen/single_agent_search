@@ -1,4 +1,5 @@
 #include "astar.h"
+#include "ida_star.h"
 #include "common.h"
 #include "problem.h"
 #include <cmath>
@@ -67,7 +68,7 @@ void RunTests()
     State g1 = { {0, 1, 1, 1, 2, 2, 2, 3, 3, 3}, 0};
     assert(g1.IsGoal(3));
 	std::cout << MisplacedDiscCount(g1, 1, 3) << std::endl;
-	
+
 
     State g2 = { {2, 2, 0, 1, 1}, 2};
     assert(g2.IsGoal(2));
@@ -77,7 +78,7 @@ void RunTests()
 }
 
 int main(int argc, char** argv) {
-	
+
     if (argc < 2)
 	{
         std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
@@ -92,9 +93,22 @@ int main(int argc, char** argv) {
 		Problem p = ReadUserInput(n);
 
 		ZeroHeuristic zeroHeuristic;
-		AStar solver(p, zeroHeuristic);
 
-		auto solution = solver.solve(false);
+		// Bool to toggle between A* and IDA*
+		const bool kUseIDAStar = true;
+
+		std::vector<State> solution;
+		if (kUseIDAStar)
+		{
+			IDAStar solver(p, zeroHeuristic);
+			solution = solver.solve(false);
+		}
+		else
+		{
+			AStar solver(p, zeroHeuristic);
+			solution = solver.solve(false);
+		}
+
 		PrintSolution(solution);
 	}
 	else
@@ -108,20 +122,33 @@ int main(int argc, char** argv) {
 
 		// NOTE(rordon): Don't try this problem until we have a better heuristic. This one gets up to over 300,000,000 nodes with BFS.
 		//Problem p = Problem({1,3,3,4,1,2,1,2,5,4,2,3,3,2,4,1,4}, {0,2,4,1,3,4,2,3,1,4,3,2,1,3,4,1,2}, 4);
-        
+
         // Heuristics
 		ZeroHeuristic zeroHueristic;
 		MisplacedDiscHeuristic misplacedDiscHeuristic;
 		HopHeuristic hopHeuristic;
 
-		AStar solver(AB17_HARD, hopHeuristic);
+		// Bool to toggle between A* and IDA*
+		const bool useIDAStar = true;
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto solution = solver.solve(true);
+
+		std::vector<State> solution;
+		if (useIDAStar)
+		{
+			IDAStar solver(AB17_HARD, hopHeuristic);
+			solution = solver.solve(true);
+		}
+		else
+		{
+			AStar solver(AB17_HARD, hopHeuristic);
+			solution = solver.solve(true);
+		}
+
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
         std::cout << "Time to solve: " << elapsed.count() << " seconds\n";
-        
+
 		PrintSolution(solution);
 	}
 

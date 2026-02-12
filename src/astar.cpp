@@ -44,11 +44,8 @@ Node GenerateMoveNode(Node * parent, Move move, uint32_t largeValue, const Heuri
 
 uint32_t ExpandNode(Node * n, Node * outChildren, const std::vector<Disk> & large, const Heuristic & h)
 {
-	// NOTE(rordon): it would be nice if we could track what the last move was
-	// 				 and not add nodes that undo the last move to save time. 
-	
 	uint32_t largeValue = large[n->state.zeroIndex];
-	
+
 	// Add swap left and swap right states
 	outChildren[0] = GenerateMoveNode(n, SWAP_RIGHT, largeValue, h);
 	outChildren[1] = GenerateMoveNode(n, SWAP_LEFT,  largeValue, h);
@@ -99,12 +96,12 @@ std::vector<State> AStar::solve(bool debug)
 		}
 		else
 		{
-			closed[n->state] = n; 
+			closed[n->state] = n;
 
 			// Expand node
 			Node children[4];
 			uint16_t childCount = ExpandNode(n, children, problem.large, heuristic);
-			
+
 			for (int i = 0; i < childCount; i++)
 			{
 				Node * child = &children[i];
