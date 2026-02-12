@@ -2,54 +2,81 @@
 #include "ida_star.h"
 #include "common.h"
 #include "problem.h"
+
+#include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <chrono>
+#include <iostream>
+#include <vector>
 
-Problem ReadUserInput(size_t num_large)
-{
+namespace {
+
+// ---------------------------- I/O + Utilities ----------------------------
+
+Problem ReadUserInput(std::size_t num_large) {
     // Read large disks
     std::vector<Disk> large(num_large);
-    for (size_t i = 0; i < num_large; ++i) {
-		int value;
+    for (std::size_t i = 0; i < num_large; ++i) {
+        int value;
         std::cin >> value;
-		large[i] = (Disk)(value);
+        large[i] = static_cast<Disk>(value);
     }
 
     // Read small disks
     std::vector<Disk> small(num_large);
-    for (size_t i = 0; i < num_large; ++i) {
-		int value;
+    for (std::size_t i = 0; i < num_large; ++i) {
+        int value;
         std::cin >> value;
-		small[i] = (Disk)(value);
+        small[i] = static_cast<Disk>(value);
     }
 
-	uint16_t n = floor(sqrt((double)num_large));
-	return Problem(large, small, n);
+    const uint16_t groupSize = static_cast<uint16_t>(
+        std::floor(std::sqrt(static_cast<double>(num_large))));
+
+    return Problem(large, small, groupSize);
 }
 
-void PrintSolution(std::vector<State> solution)
-{
+void PrintSolution(const std::vector<State>& solution) {
     std::cout << "Solution is" << std::endl;
-    for (State s : solution) { std::cout << s << std::endl; }
+    for (const State& s : solution) {
+        std::cout << s << std::endl;
+    }
 }
 
-void RunTests()
-{
-    // Everything below is just a sanity test for StateHash (using dummy data).
-    // We can delete this later, of course :)
-    //
-    // If any of you want to test this yourself, I did so with:
-    // echo -e "1 2 3 4 5 6 7 8 9 10\n1 2 3 4 5 6 7 8 9 0" | ./bin/AB 3
+enum class SolverKind {
+    IDAStar,
+    AStar,
+};
+
+struct SolveOptions {
+    SolverKind solver = SolverKind::IDAStar;
+    bool debug = false; // pass through to solver (debug printing)
+};
+
+// Keep solver selection logic in one place.
+template <typename HeuristicT>
+std::vector<State> SolveProblem(const Problem& p, HeuristicT& heuristic, const SolveOptions& opts) {
+    if (opts.solver == SolverKind::IDAStar) {
+        IDAStar solver(p, heuristic);
+        return solver.solve(opts.debug);
+    } else {
+        AStar solver(p, heuristic);
+        return solver.solve(opts.debug);
+    }
+}
+
+// ---------------------------- Debug / Test mode ----------------------------
+
+void RunSanityTests() {
     State s1;
-    s1.small = {4,5};
+    s1.small = {4, 5};
 
     State s2 = s1;
 
     State s3;
-    s3.small = {4,5,6};
-    StateHash hasher;
+    s3.small = {4, 5, 6};
 
+    StateHash hasher;
     std::cout << "Hash s1: " << hasher(s1) << std::endl;
     std::cout << "Hash s2: " << hasher(s2) << std::endl;
     std::cout << "Hash s3: " << hasher(s3) << std::endl;
@@ -64,93 +91,70 @@ void RunTests()
     }
     std::cout << "Printing s1: " << s1 << std::endl;
 
-    // Test IsGoal Function
-    State g1 = { {0, 1, 1, 1, 2, 2, 2, 3, 3, 3}, 0};
+    // Test IsGoal
+    State g1 = {{0, 1, 1, 1, 2, 2, 2, 3, 3, 3}, 0};
     assert(g1.IsGoal(3));
-	std::cout << MisplacedDiscCount(g1, 1, 3) << std::endl;
 
-
-    State g2 = { {2, 2, 0, 1, 1}, 2};
+    State g2 = {{2, 2, 0, 1, 1}, 2};
     assert(g2.IsGoal(2));
 
-    State g3 = { {1, 1, 1, 2, 2, 3, 2, 3, 3, 0}, 9};
+    State g3 = {{1, 1, 1, 2, 2, 3, 2, 3, 3, 0}, 9};
     assert(!g3.IsGoal(3));
 }
 
-int main(int argc, char** argv) {
+Problem GetDebugProblem() {
+    // Default to a “harder” one so debug output is meaningful (as opposed to AB10 or AB17).
+    return Problem(
+        {1, 2, 3, 4, 5, 4, 3, 2, 1, 1, 2, 3, 4, 1, 2, 3, 4},
+        {3, 2, 3, 2, 1, 0, 2, 1, 1, 3, 4, 1, 4, 2, 4, 3, 4},
+        4);
+}
 
-    if (argc < 2)
-	{
-        std::cerr << "Usage: " << argv[0] << " <n>" << std::endl;
+int RunNormalMode(std::size_t num_large) {
+    Problem p = ReadUserInput(num_large);
+
+    // Default heuristic for stdin-driven mode.
+    ZeroHeuristic heuristic;
+
+    SolveOptions opts;
+    opts.solver = SolverKind::IDAStar;
+    opts.debug = false;
+
+    std::vector<State> solution = SolveProblem(p, heuristic, opts);
+    PrintSolution(solution);
+    return 0;
+}
+
+int RunDebugMode() {
+    // RunSanityTests();
+
+    Problem p = GetDebugProblem();
+
+    // Use a stronger heuristic for debug mode by default.
+    HopHeuristic heuristic;
+
+    SolveOptions opts;
+    opts.solver = SolverKind::IDAStar;
+    opts.debug = true;
+
+    std::vector<State> solution = SolveProblem(p, heuristic, opts);
+    PrintSolution(solution);
+    return 0;
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <n>\n"
+                  << "  n > 0: read instance from stdin (expects 2*n integers: large then small)\n"
+                  << "  n = 0: run debug mode (hardcoded instances + debug output)\n";
         return 1;
     }
 
-	//NOTE(rordon): I'm making it so if you pass n as 0 it will run tests.
-    size_t n = std::stoi(argv[1]);
-	if (n > 0)
-	{
-		// Read problem from stdin.
-		Problem p = ReadUserInput(n);
-
-		ZeroHeuristic zeroHeuristic;
-
-		// Bool to toggle between A* and IDA*
-		const bool kUseIDAStar = true;
-
-		std::vector<State> solution;
-		if (kUseIDAStar)
-		{
-			IDAStar solver(p, zeroHeuristic);
-			solution = solver.solve(false);
-		}
-		else
-		{
-			AStar solver(p, zeroHeuristic);
-			solution = solver.solve(false);
-		}
-
-		PrintSolution(solution);
-	}
-	else
-	{
-		// RunTests();
-
-		// Problem from the example solver.
-		Problem AB17      = Problem({1,3,4,2,4,3,2,1,1,2,3,4,3,1,4,2,5}, {1,1,1,1,2,2,2,2,3,4,3,3,4,0,4,3,4}, 4);
-		Problem AB10      = Problem({1,2,3,4,1,2,3,1,2,3}, {1,1,1,3,2,2,3,3,0,2}, 2);
-		Problem AB17_HARD = Problem({1,2,3,4,5,4,3,2,1,1,2,3,4,1,2,3,4}, {3,2,3,2,1,0,2,1,1,3,4,1,4,2,4,3,4}, 4);
-
-		// NOTE(rordon): Don't try this problem until we have a better heuristic. This one gets up to over 300,000,000 nodes with BFS.
-		//Problem p = Problem({1,3,3,4,1,2,1,2,5,4,2,3,3,2,4,1,4}, {0,2,4,1,3,4,2,3,1,4,3,2,1,3,4,1,2}, 4);
-
-        // Heuristics
-		ZeroHeuristic zeroHueristic;
-		MisplacedDiscHeuristic misplacedDiscHeuristic;
-		HopHeuristic hopHeuristic;
-
-		// Bool to toggle between A* and IDA*
-		const bool useIDAStar = true;
-
-        auto start = std::chrono::high_resolution_clock::now();
-
-		std::vector<State> solution;
-		if (useIDAStar)
-		{
-			IDAStar solver(AB17_HARD, hopHeuristic);
-			solution = solver.solve(true);
-		}
-		else
-		{
-			AStar solver(AB17_HARD, hopHeuristic);
-			solution = solver.solve(true);
-		}
-
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = end - start;
-        std::cout << "Time to solve: " << elapsed.count() << " seconds\n";
-
-		PrintSolution(solution);
-	}
-
-	return 0;
+    const std::size_t n = static_cast<std::size_t>(std::stoi(argv[1]));
+    if (n == 0) {
+        return RunDebugMode();
+    }
+    return RunNormalMode(n);
 }

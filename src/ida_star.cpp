@@ -6,11 +6,11 @@
 
 #include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <limits>
 
 /*
-NOTE: Generated these doc comments with Claude because I didn't feel like
-writing them out myself :)
+NOTE: I generated these doc comments with Claude.
 
 Iterative Deepening A* (IDA*) implementation.
 
@@ -201,11 +201,7 @@ int IDAStar::dfsBounded(const State &current,
     }
 
     // Goal test.
-    //
-    // NOTE: `State::IsGoal` is not marked `const` in this codebase, so we must
-    // call it on a non-const instance.
-    State goalCheck = current;
-    if (goalCheck.IsGoal(problem.n)) {
+    if (current.IsGoal(problem.n)) {
         // Success: copy the current path (which already includes `current`)
         // into `outSolution`.
         outSolution = path;

@@ -3,16 +3,25 @@
 
 #include "common.h"
 
+#include <cstdint>
+#include <ostream>
+#include <vector>
+
 /// Represents the state of the puzzle, containing only the small disks that change.
 struct State {
   /// Stack of small disks, represented as a vector of Disk IDs.
   std::vector<Disk> small;
-  uint32_t zeroIndex = 0;
+  std::uint32_t zeroIndex = 0;
 
-  /// Equality operator: compares both large and small stacks element-wise.
+  /// Compare the small disk layout.
   bool operator==(const State &other) const;
-  bool IsGoal(int n);
-  uint32_t GetZeroIndex();
+
+  /// Returns true if this state is a goal state for the given group size `n`.
+  bool IsGoal(int n) const;
+
+  /// Finds the index of the empty space (0) in `small`.
+  /// Precondition: `small` contains exactly one 0.
+  std::uint32_t GetZeroIndex() const;
 };
 
 /// Output operator for printing the State as space-separated small disk values.

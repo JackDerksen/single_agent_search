@@ -10,8 +10,7 @@
 #include <vector>
 
 /**
- * NOTE: Generated these doc comments with Claude because I didn't feel like
- * writing them out myself :)
+ * NOTE: I generated these doc comments with Claude.
  *
  * Iterative Deepening A* (IDA*) solver.
  *

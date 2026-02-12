@@ -3,7 +3,15 @@
 #include "state.h"
 #include "common.h"
 #include "util.h"
+
+#include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <deque>
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <vector>
 
 AStar::AStar(const Problem &p, Heuristic &h): problem(p), heuristic(h)
 {

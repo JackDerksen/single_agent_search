@@ -1,30 +1,14 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// Shared types, aliases, constants, etc.
-#pragma once
+// Shared project-wide types
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <unordered_set>
-#include <unordered_map>
-#include <queue>
-#include <iostream>
-#include <ostream>
-#include <functional>
-#include <cassert>
-#include <cstddef>
-#include <algorithm>
+#include <cstdint>
 
-// Disk type for small and large disks
-using Disk = uint8_t;
+// Disk type for small and large disks.
+using Disk = std::uint8_t;
 
-typedef enum {
-	SWAP_RIGHT,
-	SWAP_LEFT,
-	SWAP_N_RIGHT,
-	SWAP_N_LEFT,
-} Move;
+// Move operators in the search space.
+#include "move.h"
 
 #endif // COMMON_H

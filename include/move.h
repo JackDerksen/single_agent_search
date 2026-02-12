@@ -1,6 +1,12 @@
 #ifndef MOVE_H
 #define MOVE_H
 
-// For defining moves (we might not use this but I think it's nice to have)
+// Move operators in the search space.
+enum Move {
+    SWAP_RIGHT,
+    SWAP_LEFT,
+    SWAP_N_RIGHT,
+    SWAP_N_LEFT,
+};
 
 #endif // MOVE_H
